@@ -1,0 +1,28 @@
+# FastAPI Web Framework & ASGI Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# Core LangChain & LangGraph Orchestration
+langgraph>=1.2.8
+langchain-core>=1.8.4
+langchain>=1.3.13
+
+# Google Cloud Vertex AI (ChatGoogleGenerativeAI with vertexai=True via ADC)
+langchain-google-genai>=4.2.7
+google-genai>=2.10.0
+google-auth>=2.30.0
+
+# Database & State Persistence (MongoDB Atlas & In-Memory Simulation)
+motor>=3.7.0
+mongomock-motor>=0.0.36
+pymongo>=4.8.0
+langgraph-checkpoint-mongodb>=0.4.0
+
+# Environment, Network & Schema Validation
+pydantic>=2.10.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+httpx>=0.28.0
+
+# Web Search Tooling
+tavily-python>=0.5.0

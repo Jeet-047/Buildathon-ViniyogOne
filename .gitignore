@@ -1,0 +1,53 @@
+# Environments & Virtual Envs
+env/
+.venv/
+venv/
+ENV/
+env*/
+
+# Python cache & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Secrets & Environment variables
+.env
+*.env
+!*.env.example
+*.pem
+*.key
+gcp-key.json
+atlas-credentials.env
+
+# Ignored project data, tests & local scripts
+backend/tests/
+backend/scripts/
+backend/profiles_data/
+tests/
+scripts/
+profiles_data/
+
+# Node / Frontend dependencies & builds
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

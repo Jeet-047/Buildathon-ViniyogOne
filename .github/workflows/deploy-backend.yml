@@ -1,0 +1,66 @@
+name: Deploy Viniyog ONE Backend to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: asia-south1
+  SERVICE_NAME: viniyogone-backend
+  REPO_NAME: viniyogone-repo
+
+jobs:
+  deploy:
+    name: Build & Deploy to Google Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Ensure Artifact Registry Repository Exists
+        run: |
+          gcloud artifacts repositories describe ${{ env.REPO_NAME }} --location=${{ env.REGION }} || \
+          gcloud artifacts repositories create ${{ env.REPO_NAME }} \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="Viniyog ONE Backend Docker Repository" --quiet
+
+      - name: Configure Docker for GCP Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          LATEST_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:latest"
+          
+          docker build -t $IMAGE_TAG -t $LATEST_TAG ./backend
+          docker push $IMAGE_TAG
+          docker push $LATEST_TAG
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --timeout=300 \
+            --concurrency=80 \
+            --cpu=1 \
+            --memory=1Gi \
+            --set-env-vars="ENVIRONMENT=production,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},GOOGLE_VERTEX_LOCATION=global,MONGO_SIMULATION=false,MONGO_DB_NAME=viniyogone_db,MONGO_URI=${{ secrets.MONGO_URI }},LANGSMITH_TRACING=true,LANGSMITH_PROJECT=Google-Buildathon-VO,LANGSMITH_API_KEY=${{ secrets.LANGSMITH_API_KEY }}"
