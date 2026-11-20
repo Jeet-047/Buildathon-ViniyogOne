@@ -63,4 +63,5 @@ jobs:
             --concurrency=80 \
             --cpu=1 \
             --memory=1Gi \
-            --set-env-vars="ENVIRONMENT=production,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},GOOGLE_VERTEX_LOCATION=global,MONGO_SIMULATION=false,MONGO_DB_NAME=viniyogone_db,MONGO_URI=${{ secrets.MONGO_URI }},LANGSMITH_TRACING=true,LANGSMITH_PROJECT=Google-Buildathon-VO,LANGSMITH_API_KEY=${{ secrets.LANGSMITH_API_KEY }}"
+            --set-env-vars="ENVIRONMENT=production,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},GOOGLE_VERTEX_LOCATION=global,MONGO_SIMULATION=false,MONGO_DB_NAME=viniyogone_db,MONGO_URI=${{ secrets.MONGO_URI }},LANGSMITH_TRACING=true,LANGSMITH_PROJECT=Google-Buildathon-VO,LANGSMITH_API_KEY=${{ secrets.LANGSMITH_API_KEY }}" \
+            --quiet

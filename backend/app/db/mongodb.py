@@ -16,25 +16,40 @@ _is_seeded: bool = False
 
 
 async def seed_demo_data(db) -> None:
-    """Seeds the 4 demo personas (user_profiles & behavioral_insights) into MongoDB or MongoMock."""
+    """
+    Seeds the 4 demo personas (user_profiles & behavioral_insights) into MongoDB or MongoMock.
+    Skips seeding if profiles already exist in the database.
+    """
     global _is_seeded
     if _is_seeded:
         return
 
-    logger.info("Seeding the 4 Buildathon demo profiles from backend/profiles_data...")
+    # Check if database already has the demo profiles (e.g. live MongoDB Atlas)
+    try:
+        existing_count = await db.user_profiles.count_documents({})
+        if existing_count >= 4:
+            logger.info(f"✓ MongoDB already contains {existing_count} demo user profile(s). Skipping seed.")
+            _is_seeded = True
+            return
+    except Exception as exc:
+        logger.warning(f"Could not check existing profiles count: {exc}")
+
+    logger.info("Seeding the 4 Buildathon demo profiles from local data...")
     records = build_all_persona_records()
     for item in records:
         collection_name = item["collection"]
         col = getattr(db, collection_name)
         doc = item.get("doc", {})
-        user_id = doc.get("user_id")
-        await col.update_one(
-            {"user_id": user_id},
-            {"$set": doc},
-            upsert=True,
-        )
+        # Only seed if document contains actual data
+        if doc and len(doc) > 3:
+            user_id = doc.get("user_id")
+            await col.update_one(
+                {"user_id": user_id},
+                {"$set": doc},
+                upsert=True,
+            )
     _is_seeded = True
-    logger.info("✓ 4 Demo profiles (user_profiles & behavioral_insights) seeded successfully.")
+    logger.info("✓ Demo profiles seeded successfully.")
 
 
 def get_mongo_db():
